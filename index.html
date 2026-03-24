@@ -3,205 +3,649 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Планировщик задач 2026</title>
+    <title>Мои задачи</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
         }
-        
+
+        /* СВЕТЛАЯ ТЕМА */
+        :root {
+            --bg: #f5f5f5;
+            --card: white;
+            --text: #333;
+            --text-secondary: #666;
+            --border: #ddd;
+            --accent: #4CAF50;
+            --accent-hover: #45a049;
+            --danger: #ff4444;
+            --overdue: #ffebee;
+            --overdue-text: #c62828;
+            --today: #fff3e0;
+            --today-text: #ef6c00;
+            --highlight: #fff59d;
+            --filter-bg: #e0e0e0;
+            --filter-active: #4CAF50;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* ТЁМНАЯ ТЕМА */
+        body.dark {
+            --bg: #1a1a1a;
+            --card: #2d2d2d;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
+            --border: #444;
+            --accent: #66bb6a;
+            --accent-hover: #4caf50;
+            --danger: #ff6666;
+            --overdue: #3a2a2a;
+            --overdue-text: #ff8a8a;
+            --today: #3a3220;
+            --today-text: #ffb74d;
+            --highlight: #5d4e1a;
+            --filter-bg: #404040;
+            --filter-active: #66bb6a;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             padding: 20px;
+            min-height: 100vh;
+            transition: all 0.2s;
         }
-        
-        .container {
-            background: white;
-            max-width: 500px;
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 30px;
+
+        /* ГЛАВНЫЙ КОНТЕЙНЕР - ВСЁ В ОДНОМ */
+        .app {
+            max-width: 800px;
+            margin: 0 auto;
         }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-        
-        .add-task {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .add-task input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .add-task input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .add-task button {
-            padding: 12px 25px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .add-task button:hover {
-            background: #5a67d8;
-        }
-        
-        .stats {
+
+        /* ВЕРХНЯЯ ПАНЕЛЬ - ТЕМА И ЗАГОЛОВОК */
+        .top-bar {
             display: flex;
             justify-content: space-between;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .tasks-list {
-            list-style: none;
-            margin-bottom: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .task-item {
-            display: flex;
             align-items: center;
-            padding: 12px;
-            background: #f8f9fa;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            color: var(--accent);
+        }
+        .theme-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        /* ОСНОВНАЯ КАРТОЧКА - ВСЁ В ОДНОМ БЛОКЕ */
+        .main-panel {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        /* ФОРМА ДОБАВЛЕНИЯ - КОМПАКТНО */
+        .add-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .add-form input, .add-form select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+        }
+        .add-form button {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-form button:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ПОИСК */
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        /* ФИЛЬТРЫ КАТЕГОРИЙ */
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            padding: 6px 12px;
+            background: var(--filter-bg);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 13px;
+        }
+        .filter-btn.active {
+            background: var(--filter-active);
+            color: white;
+        }
+        .filter-count {
+            margin-left: 5px;
+            opacity: 0.8;
+        }
+
+        /* СПИСОК ЗАДАЧ */
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .task-item {
+            background: var(--bg);
             border-radius: 10px;
-            margin-bottom: 8px;
-            transition: all 0.3s;
+            padding: 12px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        
-        .task-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .task-item.overdue {
+            border-left-color: var(--danger);
+            background: var(--overdue);
         }
-        
-        .task-check {
-            margin-right: 12px;
-            width: 20px;
-            height: 20px;
+        .task-item.today {
+            border-left-color: var(--today-text);
+            background: var(--today);
+        }
+        .task-info {
+            flex: 1;
+        }
+        .task-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 5px;
             cursor: pointer;
         }
-        
-        .task-text {
-            flex: 1;
-            font-size: 16px;
-            color: #333;
-        }
-        
-        .task-text.completed {
-            text-decoration: line-through;
-            color: #999;
-        }
-        
-        .task-date {
+        .task-meta {
+            display: flex;
+            gap: 12px;
             font-size: 12px;
-            color: #999;
-            margin-right: 15px;
+            color: var(--text-secondary);
         }
-        
+        .category-badge {
+            background: var(--filter-bg);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
         .delete-btn {
             background: none;
             border: none;
-            color: #e74c3c;
             font-size: 20px;
             cursor: pointer;
-            padding: 0 5px;
-            transition: color 0.3s;
+            color: var(--danger);
+            padding: 5px;
         }
-        
-        .delete-btn:hover {
-            color: #c0392b;
-        }
-        
-        .clear-btn {
+        .edit-input {
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+            color: var(--text);
             width: 100%;
-            padding: 12px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
+            font-size: 14px;
         }
-        
-        .clear-btn:hover {
-            background: #c0392b;
+        .highlight {
+            background: var(--highlight);
+            border-radius: 4px;
+            padding: 0 2px;
+            color: #000;
         }
-        .empty-message {
+        body.dark .highlight {
+            color: #ffd966;
+        }
+        .empty-msg {
             text-align: center;
-            color: #999;
-            padding: 30px;
-            font-style: italic;
+            padding: 40px;
+            color: var(--text-secondary);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📋 Планировщик задач</h1>
-        <div class="subtitle">Управляй своим временем эффективно</div>
-        
-        <!-- Блок добавления задачи -->
-        <div class="add-task">
-            <input type="text" id="taskInput" placeholder="Введите новую задачу...">
-            <button id="addBtn">Добавить</button>
-        </div>
-        
-        <!-- Статистика -->
-        <div class="stats">
-            <span>Всего: <span id="totalTasks">0</span></span>
-            <span>Выполнено: <span id="completedTasks">0</span></span>
-            <span>Осталось: <span id="pendingTasks">0</span></span>
-        </div>
-        
-        <!-- Список задач -->
-        <ul class="tasks-list" id="tasksList">
-            <li class="empty-message">✨ Добавьте свою первую задачу</li>
-        </ul>
-        
-        <!-- Кнопка очистки -->
-        <button class="clear-btn" id="clearBtn">Очистить всё</button>
+<div class="app">
+    <div class="top-bar">
+        <h1>📋 Мои задачи</h1>
+        <button class="theme-btn" id="themeBtn">🌙 Тёмная тема</button>
     </div>
+
+    <div class="main-panel">
+        <!-- Форма добавления -->
+        <div class="add-form">
+            <input type="text" id="taskInput" placeholder="Что нужно сделать?">
+            <input type="date" id="dateInput">
+            <select id="categorySelect">
+                <option value="Работа">💼 Работа</option>
+                <option value="Учеба">📚 Учеба</option>
+                <option value="Личное">❤️ Личное</option>
+                <option value="Дом">🏠 Дом</option>
+            </select>
+            <button id="addBtn">+ Добавить</button>
+        </div>
+
+        <!-- Поиск -->
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Поиск задач...">
+
+        <!-- Фильтры категорий -->
+        <div class="filters" id="filters"></div>
+
+        <!-- Список задач -->
+        <div id="tasksList" class="tasks-list"></div>
+    </div>
+</div>
+
+<script>
+    // ============= ДАННЫЕ =============
+    let tasks = [];
+    let nextId = 1;
+    let currentFilter = "Все";
+    let searchText = "";
+    let editingTaskId = null;
+
+    // ============= СОХРАНЕНИЕ В localStorage =============
+    function saveData() {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        localStorage.setItem("nextId", nextId);
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem("tasks");
+        if (saved) {
+            tasks = JSON.parse(saved);
+            nextId = localStorage.getItem("nextId") ? parseInt(localStorage.getItem("nextId")) : tasks.length + 1;
+        } else {
+            // Примеры задач для демонстрации
+            tasks = [
+                { id: 1, text: "Сделать лабораторную работу", dueDate: "2026-03-24", category: "Учеба", lastModified: new Date().toLocaleString() },
+                { id: 2, text: "Купить продукты", dueDate: "2026-03-23", category: "Дом", lastModified: new Date().toLocaleString() },
+                { id: 3, text: "Позвонить маме", dueDate: null, category: "Личное", lastModified: new Date().toLocaleString() },
+                { id: 4, text: "Сдать отчёт", dueDate: "2026-03-24", category: "Работа", lastModified: new Date().toLocaleString() }
+            ];
+            nextId = 5;
+            saveData();
+        }
+    }
+
+    // ============= РАБОТА С ДАТАМИ =============
+    function getToday() {
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return today;
+    }
+
+    function isOverdue(dateStr) {
+        if (!dateStr) return false;
+        let dueDate = new Date(dateStr);
+        dueDate.setHours(0, 0, 0, 0);
+        return dueDate < getToday();
+    }
+
+    function isToday(dateStr) {
+        if (!dateStr) return false;
+        let dueDate = new Date(dateStr);
+        dueDate.setHours(0, 0, 0, 0);
+        return dueDate.getTime() === getToday().getTime();
+    }
+
+    // ============= СОРТИРОВКА (просроченные > сегодняшние > остальные) =============
+    function sortTasks(taskList) {
+        return [...taskList].sort((a, b) => {
+            let aOver = isOverdue(a.dueDate);
+            let bOver = isOverdue(b.dueDate);
+            if (aOver && !bOver) return -1;
+            if (!aOver && bOver) return 1;
+            
+            let aToday = isToday(a.dueDate);
+            let bToday = isToday(b.dueDate);
+            if (aToday && !bToday) return -1;
+            if (!aToday && bToday) return 1;
+            
+            return 0;
+        });
+    }
+
+    // ============= ФИЛЬТРАЦИЯ (категория + поиск) =============
+    function getFilteredTasks() {
+        let filtered = tasks;
+        
+        // Фильтр по категории
+        if (currentFilter !== "Все") {
+            filtered = filtered.filter(t => t.category === currentFilter);
+        }
+        
+        // Поиск по тексту (без учёта регистра)
+        if (searchText.trim() !== "") {
+            let lowerSearch = searchText.toLowerCase();
+            filtered = filtered.filter(t => t.text.toLowerCase().includes(lowerSearch));
+        }
+        
+        return sortTasks(filtered);
+    }
+
+    // ============= ПОДСЧЁТ ЗАДАЧ ПО КАТЕГОРИЯМ =============
+    function getCategoryCounts() {
+        let counts = {
+            "Все": tasks.length,
+            "Работа": 0,
+            "Учеба": 0,
+            "Личное": 0,
+            "Дом": 0
+        };
+        tasks.forEach(task => {
+            if (counts[task.category] !== undefined) {
+                counts[task.category]++;
+            }
+        });
+        return counts;
+    }
+
+    // ============= ОТРИСОВКА ФИЛЬТРОВ =============
+    function renderFilters() {
+        let counts = getCategoryCounts();
+        let categories = ["Все", "Работа", "Учеба", "Личное", "Дом"];
+        let filtersHtml = "";
+        
+        categories.forEach(cat => {
+            let activeClass = currentFilter === cat ? "active" : "";
+            filtersHtml += `
+                <button class="filter-btn ${activeClass}" data-category="${cat}">
+                    ${cat} <span class="filter-count">(${counts[cat]})</span>
+                </button>
+            `;
+        });
+        
+        document.getElementById("filters").innerHTML = filtersHtml;
+        // Добавляем обработчики
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                currentFilter = btn.dataset.category;
+                renderFilters();
+                renderTasks();
+            });
+        });
+    }
+
+    // ============= ПОДСВЕТКА ПОИСКА =============
+    function highlightText(text, query) {
+        if (!query.trim()) return text;
+        let lowerText = text.toLowerCase();
+        let lowerQuery = query.toLowerCase();
+        let index = lowerText.indexOf(lowerQuery);
+        if (index === -1) return text;
+        
+        let before = text.slice(0, index);
+        let match = text.slice(index, index + query.length);
+        let after = text.slice(index + query.length);
+        return `${before}<span class="highlight">${escapeHtml(match)}</span>${after}`;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ============= ОТРИСОВКА ЗАДАЧ =============
+    function renderTasks() {
+        let filtered = getFilteredTasks();
+        let container = document.getElementById("tasksList");
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-msg">📭 Ничего не найдено</div>';
+            return;
+        }
+        
+        let tasksHtml = "";
+        
+        filtered.forEach(task => {
+            let overdueClass = isOverdue(task.dueDate) ? "overdue" : "";
+            let todayClass = isToday(task.dueDate) ? "today" : "";
+            let priorityClass = overdueClass || todayClass;
+            
+            let dueText = task.dueDate ? new Date(task.dueDate).toLocaleDateString("ru-RU") : "без срока";
+            let isEditing = editingTaskId === task.id;
+            
+            if (isEditing) {
+                tasksHtml += `
+                    <div class="task-item ${priorityClass}">
+                        <div class="task-info" style="flex:1">
+                            <input type="text" id="edit-input-${task.id}" class="edit-input" value="${escapeHtml(task.text)}">
+                            <div class="task-meta" style="margin-top: 8px">
+                                <span class="category-badge">${task.category}</span>
+                                <span>📅 ${dueText}</span>
+                                <span>🕒 ${task.lastModified || "—"}</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="delete-btn" data-id="${task.id}" data-action="save">💾</button>
+                            <button class="delete-btn" data-id="${task.id}" data-action="cancel">✖</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                let highlighted = highlightText(task.text, searchText);
+                tasksHtml += `
+                    <div class="task-item ${priorityClass}">
+                        <div class="task-info">
+                            <div class="task-text" data-id="${task.id}">${highlighted}</div>
+                            <div class="task-meta">
+                                <span class="category-badge">${task.category}</span>
+                                <span>📅 ${dueText}</span>
+                                <span>🕒 ${task.lastModified || "—"}</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="delete-btn" data-id="${task.id}" data-action="delete">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        container.innerHTML = tasksHtml;
+        // Обработчики для кнопок удаления и сохранения
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+            let id = parseInt(btn.dataset.id);
+            let action = btn.dataset.action;
+            
+            if (action === "delete") {
+                btn.addEventListener("click", () => deleteTask(id));
+            } else if (action === "save") {
+                btn.addEventListener("click", () => saveEdit(id));
+            } else if (action === "cancel") {
+                btn.addEventListener("click", () => {
+                    editingTaskId = null;
+                    renderTasks();
+                });
+            }
+        });
+        
+        // Обработчики для двойного клика по тексту (редактирование)
+        if (!editingTaskId) {
+            document.querySelectorAll(".task-text").forEach(el => {
+                el.addEventListener("dblclick", (e) => {
+                    let id = parseInt(el.dataset.id);
+                    editingTaskId = id;
+                    renderTasks();
+                    // Автофокус на поле ввода
+                    setTimeout(() => {
+                        let input = document.getElementById(`edit-input-${id}`);
+                        if (input) {
+                            input.focus();
+                            input.addEventListener("keydown", (e) => {
+                                if (e.key === "Enter") saveEdit(id);
+                                if (e.key === "Escape") {
+                                    editingTaskId = null;
+                                    renderTasks();
+                                }
+                            });
+                            input.addEventListener("blur", () => {
+                                setTimeout(() => {
+                                    if (editingTaskId === id) saveEdit(id);
+                                }, 200);
+                            });
+                        }
+                    }, 50);
+                });
+            });
+        }
+    }
     
-    <script src="script.js"></script>
+    function saveEdit(id) {
+        let input = document.getElementById(`edit-input-${id}`);
+        if (input) {
+            let newText = input.value.trim();
+            if (newText === "") {
+                alert("Текст задачи не может быть пустым");
+                return;
+            }
+            let task = tasks.find(t => t.id === id);
+            if (task) {
+                task.text = newText;
+                task.lastModified = new Date().toLocaleString();
+                saveData();
+            }
+        }
+        editingTaskId = null;
+        renderFilters();
+        renderTasks();
+    }
+    
+    function deleteTask(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        if (editingTaskId === id) editingTaskId = null;
+        saveData();
+        renderFilters();
+        renderTasks();
+    }
+    
+    // ============= ДОБАВЛЕНИЕ ЗАДАЧИ =============
+    function addTask() {
+        let text = document.getElementById("taskInput").value.trim();
+        if (text === "") {
+            alert("Введите текст задачи");
+            return;
+        }
+        
+        let dueDate = document.getElementById("dateInput").value;
+        if (dueDate === "") dueDate = null;
+        
+        let category = document.getElementById("categorySelect").value;
+        
+        let newTask = {
+            id: nextId++,
+            text: text,
+            dueDate: dueDate,
+            category: category,
+            lastModified: new Date().toLocaleString()
+        };
+        
+        tasks.push(newTask);
+        saveData();
+        
+        // Очищаем поля
+        document.getElementById("taskInput").value = "";
+        document.getElementById("dateInput").value = "";
+        
+        renderFilters();
+        renderTasks();
+    }
+    
+    // ============= ТЁМНАЯ ТЕМА =============
+    function initTheme() {
+        let savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+            document.body.classList.add("dark");
+            document.getElementById("themeBtn").innerHTML = "☀️ Светлая тема";
+        } else {
+            document.body.classList.remove("dark");
+            document.getElementById("themeBtn").innerHTML = "🌙 Тёмная тема";
+        }
+    }
+    
+    function toggleTheme() {
+        if (document.body.classList.contains("dark")) {
+            document.body.classList.remove("dark");
+            localStorage.setItem("theme", "light");
+            document.getElementById("themeBtn").innerHTML = "🌙 Тёмная тема";
+        } else {
+            document.body.classList.add("dark");
+            localStorage.setItem("theme", "dark");
+            document.getElementById("themeBtn").innerHTML = "☀️ Светлая тема";
+        }
+    }
+    
+    // ============= ПОИСК В РЕАЛЬНОМ ВРЕМЕНИ =============
+    function initSearch() {
+        let searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", (e) => {
+            searchText = e.target.value;
+            renderTasks();
+        });
+    }
+    
+    // ============= ЗАПУСК =============
+    function init() {
+        loadData();
+        initTheme();
+        initSearch();
+        renderFilters();
+        renderTasks();
+        
+        document.getElementById("addBtn").addEventListener("click", addTask);
+        document.getElementById("themeBtn").addEventListener("click", toggleTheme);
+        
+        // Добавление по Enter
+        document.getElementById("taskInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") addTask();
+        });
+    }
+    
+    init();
+</script>
 </body>
 </html>
